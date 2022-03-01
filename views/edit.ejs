@@ -1,0 +1,48 @@
+<div>
+    <h1 class="mx-4 mb-2">Add New Posts</h1>
+    <form class="mx-4" onSubmit={createpost} >
+
+        <div class="input-group input-group-outline my-3">
+
+            <label class="form-label">Post Title</label>
+            <input type="text" name='title' class="form-control" />
+        </div>
+
+       
+        <select class="form-select mt-5 px-2" name="category" id="inputGroupSelect01">
+                      <option disabled="" selected="">Select A Category</option>
+                      {
+                          category.map(e=>{
+                              return(
+                                  <option value={e.CategoryName}>{e.CategoryName}</option>
+                              )
+                          })
+                      }
+                      
+                  </select>
+        
+        <div class="input-group input-group-outline my-3">
+
+            <label for="post_title" class="form-label">Post Body</label>
+            <textarea class="mt-5 mb-3 px-2 form-control" name="postbody" id="" cols="60" rows="10"></textarea>
+        </div>
+      
+        <h3>Update Featured Image</h3>
+        <div class="input-group input-group-outline my-3">
+         
+        <label for="Featured Image" class="form-label"></label>
+              <input type="file" name="img" class="form-control" />
+        </div>
+
+        <div class="input-group input-group-outline my-3">
+
+            <label for="post_title" class="form-label">Tags</label>
+           <input type="text" name='tags' class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-warning" >Update</button>
+
+
+
+
+    </form>
+</div>

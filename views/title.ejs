@@ -1,0 +1,22 @@
+<%- include('partials/header') %> 
+
+<body class="g-sidenav-show  bg-gray-200">
+    <%- include('partials/sidebar') %>
+
+    <div class="row mb-4 mt-3 mx-4">
+        <div class='col-lg-8 col-md-6 mb-md-0 mb-4'>
+           
+        <form method="post" action="/update_title" enctype="multipart/form-data">
+            <h3 class="my-2">Update Site Title</h3>
+            <div class="input-group input-group-outline my-3">
+            <input type="text" name='title' placeholder='<%- title %>'  class="form-control" />
+            
+            </div>
+            <div class="input-group input-group-outline my-3">
+  
+            <button type="submit" class="btn btn-warning" >Update</button>
+          </div>
+          </form>
+        </div>
+    </div>
+    <%- include('partials/footer') %> 

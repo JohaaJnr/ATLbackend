@@ -1,0 +1,27 @@
+<%- include('partials/header') %> 
+
+<body class="g-sidenav-show  bg-gray-200">
+    <%- include('partials/sidebar') %> 
+<div class="row mb-4 mt-3 mx-4">
+    <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
+      <h3 class="my-2">Update Site Logo</h3>
+      <img src="/uploads/logo/<%- file %>" alt="profile_image" class="w-40 border-radius-lg shadow-sm" />
+
+      <form action="/upload" method="post" enctype="multipart/form-data">
+
+        <div class="input-group input-group-outline my-3">
+
+          <input type="file" name="sitelogo" />
+
+          <div class='input-group input-group-outline my-3'>
+            <button type="submit" class="btn btn-warning">Submit</button>
+          </div>
+
+        </div>
+      </form>
+
+    </div>
+
+  </div>
+
+  <%- include('partials/footer') %> 
