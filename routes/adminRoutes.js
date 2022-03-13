@@ -10,31 +10,51 @@ const Post = require('../model/Posts')
 const User = require('../model/User')
 const { ensureAuth, ensureGuest } = require('../middleware/auth')
 
-Router.get('/',  (req,res)=>{
-    res.render('index')
+Router.get('/', ensureAuth, (req,res)=>{
+   const postCount = Post.countDocuments({})
+    const categoryCount = Category.countDocuments({})
+    const menusCount = Menu.countDocuments({})
+    const logo = Logo.find({})
+    Promise.all([postCount, categoryCount, menusCount]).then(result=>{
+       
+        res.render('index', { post: result[0], category: result[1], menu: result[2]})
+    }).catch(err=>{
+        console.error(err)
+    })
+   
 })
 
-Router.get('/login',  (req,res)=>{
+Router.get('/login', ensureGuest, (req,res)=>{
     res.render('login')
 })
 
 Router.post('/signin',  (req,res)=>{
     const email = req.body.email
     const pass = req.body.pass
-    const hash = User.find({ UserEmail: req.body.email }, (err, result)=>{
+     User.find({ UserEmail: email }, (err, result)=>{
         if(err){
-            res.json({
-                msg: 'Wrong credentials'
-            })
-        }else{
-           const hashedPass = result[0].UserPass
-           const match = bcrypt.compareSync(pass, hashedPass);
-           if(match){
-               res.redirect('/')
-           }else{
-               res.redirect('/login')
-           }
+           console.error(err)
         }
+        
+        if(result == null){
+            console.log('User Does not exist')
+            res.redirect('/login')
+        }
+        if(result){
+            
+            if(result[0].UserEmail == email){
+                const hashedPass = result[0].UserPass
+                const match = bcrypt.compareSync(pass, hashedPass);
+                if(match){
+                    req.session.username = result[0].UserName
+                   
+                    res.redirect('/')
+                }else{
+                    res.redirect('/login')
+                }
+            }
+        }
+        
     })
     
    
@@ -58,30 +78,33 @@ Router.post('/registerUser', (req,res)=>{
     res.redirect('/login')
 })
 
-Router.get('/posts',  (req,res)=>{
-    const category = Category.find({}, (err, result)=>{
-        if(err){
-            console.error(err)
-        }else{
-            res.render('posts', { category: result})
-        }
-    })
+Router.get('/posts', ensureAuth, (req,res)=>{
+   const category =  Category.find({})
+    const posts =  Post.find({})
+    Promise.all([category, posts]).then(result => {
+        
+       res.render('posts', { cat: result[0], post: result[1]})
+     }).catch(err => {
+  //handle your error here
+       console.log(`Error : ${err}`);
+     })
+  
 })
 
 
-Router.get('/logo', (req,res)=>{
+Router.get('/logo', ensureAuth, (req,res)=>{
     const logo = Logo.find({}, (err, result)=>{
         if(err){
             console.error(err)
         }else{
           res.render('logo', { file: result[0].Logo })
-        
+            
         }
     })
     
 })
 
-Router.get('/title', (req,res)=>{
+Router.get('/title', ensureAuth, (req,res)=>{
 
     const details = Siteinfo.find({}, function(err, result){
        if(err){
@@ -94,7 +117,7 @@ Router.get('/title', (req,res)=>{
 })
 
 
-Router.get('/menus', (req,res)=>{
+Router.get('/menus', ensureAuth, (req,res)=>{
     const details = Menu.find({}, (err, result)=>{
         if(err){
             console.error(err)
@@ -105,7 +128,7 @@ Router.get('/menus', (req,res)=>{
    
 })
 
-Router.get('/categories', (req,res)=>{
+Router.get('/categories', ensureAuth, (req,res)=>{
     const details = Category.find({}, (err,result)=>{
         if(err){
             console.error(err)
@@ -116,23 +139,26 @@ Router.get('/categories', (req,res)=>{
     })
 })
 
-Router.get('/profile',  (req,res)=>{
+Router.get('/profile', ensureAuth, (req,res)=>{
     res.render('profile')
 })
 
 
-Router.post('/upload',  (req,res)=>{
+Router.post('/upload', ensureAuth, (req,res)=>{
     let logo = req.files.sitelogo
+   global.sideLogo = logo.name
+  
     const id = '621b6fc127b761d936ecde31'
-   console.log(logo.name)
+   
     const uploadPath = dirname(require.main.filename) + '/public/uploads/logo/' + logo.name
     const sitelogo = Logo.findByIdAndUpdate(id, { Logo: logo.name }, err=>{
         if(err) throw err;
+        
     })
+    
     logo.mv(uploadPath, function(err) {
-        if (err)
-          return res.status(500).send(err);
-       
+        if (err) return res.status(500).send(err);
+      
         res.redirect('/logo')
       });
     
@@ -141,7 +167,7 @@ Router.post('/upload',  (req,res)=>{
 })
 
 
-Router.post('/update_title', (req,res)=>{
+Router.post('/update_title', ensureAuth, (req,res)=>{
     const title = req.body.title;
     const id = '621709929fc03bd1bde8107b'
     const up = Siteinfo.findByIdAndUpdate(id, {SiteName: title}, err=>{
@@ -153,7 +179,7 @@ Router.post('/update_title', (req,res)=>{
     })
 })
 
-Router.post('/addcategory', (req,res)=>{
+Router.post('/addcategory', ensureAuth, (req,res)=>{
     const value = req.body.catname;
     const newCat={
         CategoryName: value
@@ -162,7 +188,7 @@ Router.post('/addcategory', (req,res)=>{
     res.redirect('/categories')
 })
 
-Router.post('/create_menu',  (req,res)=>{
+Router.post('/create_menu', ensureAuth, (req,res)=>{
     const menu = req.body.menutitle;
     const newMenu = {
         Menu: menu
@@ -171,14 +197,14 @@ Router.post('/create_menu',  (req,res)=>{
    res.redirect('/menus')
 })
 
-Router.post('/new/post', (req,res)=>{
+Router.post('/new/post', ensureAuth, (req,res)=>{
     const featureImg = req.files.img
 
     const newPost = {
         PostTitle : req.body.title,
         PostCategory : req.body.category,
         PostBody : req.body.postbody,
-        FeaturedImage : featureImg.name,
+        FeaturedImage : `http://localhost:5000/uploads/${featureImg.name}`,
         Tags : req.body.tags
     }
     const post = Post.create(newPost)
@@ -201,7 +227,7 @@ Router.post('/new/post', (req,res)=>{
 
 
 Router.get('/logout', (req,res)=>{
-    req.logOut();
+    req.session.destroy();
     res.redirect('/login')
 })
 

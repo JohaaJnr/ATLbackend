@@ -5,6 +5,7 @@ const path = require('path')
 const cors = require('cors')
 const db = require('./config/db')
 const fileUpload = require('express-fileupload')
+const session = require('express-session')
 const app = express()
 
 dotenv.config({path: './config/config.env'})
@@ -13,9 +14,18 @@ db();
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(fileUpload())
 app.use(cors())
+app.use(session({
+    secret: 'keyboard cat',
+    resave: true,
+    saveUninitialized: true
+    
+  }))
+
 
 app.set('views', './views')
 app.set('view engine', 'ejs')
+
+
 
 app.use('/', adminRoutes)
 

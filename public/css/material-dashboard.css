@@ -251,8 +251,11 @@ svg {
   vertical-align: middle; }
 
 table {
+  overflow-y: scroll;
+  height: 40vh;
   caption-side: bottom;
-  border-collapse: collapse; }
+  border-collapse: collapse; 
+}
 
 caption {
   padding-top: 0.5rem;
@@ -1616,14 +1619,18 @@ progress {
   margin-bottom: 1rem;
   color: #7b809a;
   vertical-align: top;
-  border-color: #f0f2f5; }
+  border-color: #f0f2f5; 
+ 
+}
   .table > :not(caption) > * > * {
     padding: 0.5rem 0.5rem;
     background-color: var(--bs-table-bg);
     border-bottom-width: 1px;
     box-shadow: inset 0 0 0 9999px var(--bs-table-accent-bg); }
   .table > tbody {
-    vertical-align: inherit; }
+    vertical-align: inherit;
+  
+  }
   .table > thead {
     vertical-align: bottom; }
   .table > :not(:first-child) {
@@ -1748,7 +1755,10 @@ progress {
 
 .table-responsive {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch; }
+  height: 60vh;
+  
+  overflow-y: scroll;
+  }
 
 @media (max-width: 575.98px) {
   .table-responsive-sm {
@@ -1757,6 +1767,8 @@ progress {
 
 @media (max-width: 767.98px) {
   .table-responsive-md {
+   
+    overflow-y: scroll;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch; } }
 
@@ -1888,6 +1900,7 @@ progress {
         transition: none; } }
   .form-control:hover:not(:disabled):not([readonly])::-webkit-file-upload-button {
     background-color: rgba(0, 0, 0, 0.05); }
+
 
 .form-control-plaintext {
   display: block;
