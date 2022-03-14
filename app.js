@@ -6,12 +6,21 @@ const cors = require('cors')
 const db = require('./config/db')
 const fileUpload = require('express-fileupload')
 const session = require('express-session')
+const logo = require('./model/Sitelogo')
 const app = express()
 
 dotenv.config({path: './config/config.env'})
 const Port = process.env.PORT
 db();
 app.use(express.static(path.join(__dirname, 'public')))
+
+app.use((req, res, next)=>{
+  logo.find({}, (err,result)=>{
+    app.locals.sitelogo = result[0].Logo
+  })
+  next()
+})
+
 app.use(fileUpload())
 app.use(cors())
 app.use(session({

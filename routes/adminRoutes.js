@@ -9,12 +9,13 @@ const Logo = require('../model/Sitelogo')
 const Post = require('../model/Posts')
 const User = require('../model/User')
 const { ensureAuth, ensureGuest } = require('../middleware/auth')
+const fs = require('fs')
 
 Router.get('/', ensureAuth, (req,res)=>{
    const postCount = Post.countDocuments({})
     const categoryCount = Category.countDocuments({})
     const menusCount = Menu.countDocuments({})
-    const logo = Logo.find({})
+   
     Promise.all([postCount, categoryCount, menusCount]).then(result=>{
        
         res.render('index', { post: result[0], category: result[1], menu: result[2]})
@@ -28,7 +29,7 @@ Router.get('/login', ensureGuest, (req,res)=>{
     res.render('login')
 })
 
-Router.post('/signin',  (req,res)=>{
+Router.post('/signin', ensureGuest, (req,res)=>{
     const email = req.body.email
     const pass = req.body.pass
      User.find({ UserEmail: email }, (err, result)=>{
@@ -74,7 +75,7 @@ Router.post('/registerUser', (req,res)=>{
         UserPass: hashed
 
     }
-    const userRegister = User.create(newUser)
+     User.create(newUser)
     res.redirect('/login')
 })
 
@@ -145,25 +146,33 @@ Router.get('/profile', ensureAuth, (req,res)=>{
 
 
 Router.post('/upload', ensureAuth, (req,res)=>{
-    let logo = req.files.sitelogo
-   global.sideLogo = logo.name
-  
-    const id = '621b6fc127b761d936ecde31'
-   
-    const uploadPath = dirname(require.main.filename) + '/public/uploads/logo/' + logo.name
-    const sitelogo = Logo.findByIdAndUpdate(id, { Logo: logo.name }, err=>{
+
+    Logo.find({}, (err,result)=>{
         if(err) throw err;
+        const logofilename = result[0].Logo
+        const filepath = dirname(require.main.filename) + '/public/uploads/logo/' + logofilename
+
+        fs.unlinkSync(filepath)
         
     })
+
+    let logo = req.files.sitelogo
+
+    Logo.find({}, (err,result)=>{
+        if(err) throw err
+        const id = result[0]._id
+        Logo.findByIdAndUpdate(id, { Logo: logo.name }, err=>{
+            if(err) throw err;
+            const uploadPath = dirname(require.main.filename) + '/public/uploads/logo/' + logo.name
     
-    logo.mv(uploadPath, function(err) {
-        if (err) return res.status(500).send(err);
-      
-        res.redirect('/logo')
-      });
     
-   
-   
+            logo.mv(uploadPath, function(err) {
+                if (err) return res.status(500).send(err);
+              
+                res.redirect('/logo')
+              });
+        })
+    })
 })
 
 
