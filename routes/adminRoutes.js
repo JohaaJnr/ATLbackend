@@ -10,6 +10,7 @@ const Post = require('../model/Posts')
 const User = require('../model/User')
 const { ensureAuth, ensureGuest } = require('../middleware/auth')
 const fs = require('fs')
+const { body, validationResult } = require('express-validator') 
 
 Router.get('/', ensureAuth, (req,res)=>{
    const postCount = Post.countDocuments({})
@@ -29,7 +30,12 @@ Router.get('/login', ensureGuest, (req,res)=>{
     res.render('login')
 })
 
-Router.post('/signin', ensureGuest, (req,res)=>{
+Router.post('/signin', ensureGuest, body('email').isEmail(), body('pass').isLength({ min: 5}), (req,res)=>{
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     const email = req.body.email
     const pass = req.body.pass
      User.find({ UserEmail: email }, (err, result)=>{
@@ -65,7 +71,13 @@ Router.get('/register', (req,res)=>{
     res.render('register')
 })
 
-Router.post('/registerUser', (req,res)=>{
+Router.post('/registerUser', body('email').isEmail(), body('pass').isLength({min: 5}), (req,res)=>{
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const pass = req.body.pass
     const saltRounds = 10
     const hashed = bcrypt.hashSync(pass, saltRounds);
